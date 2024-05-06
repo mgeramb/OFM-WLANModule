@@ -2,6 +2,7 @@
 #ifdef ARDUINO_ARCH_ESP32
 #include <Preferences.h>
 #endif
+#include "WiFi.h"
 
 WLANModule::WLANModule()
 {
@@ -78,8 +79,8 @@ bool WLANModule::processCommand(const std::string cmd, bool diagnoseKo)
             logInfoP("SSID: {%s}", WiFi.SSID().c_str());
         if (state == WL_CONNECTED)
         {
-            logInfoP("IP: {%s}", WiFi.localIP().toString().c_str());
-            logInfoP("Gateway-IP: {%s}", WiFi.localIP().toString().c_str());
+            logInfoP("IP: {%s}", localIP().toString().c_str());
+            logInfoP("Gateway-IP: {%s}", gatewayIP().toString().c_str());
         }
         return true;
     }
@@ -92,12 +93,30 @@ bool WLANModule::connected()
 }
 
 
+IPAddress WLANModule::localIP()
+{
+    return WiFi.localIP();
+}
+
+IPAddress WLANModule::subnetMask()
+{
+    return WiFi.subnetMask();
+}
+
+IPAddress WLANModule::gatewayIP()
+{
+    return WiFi.gatewayIP();
+}
+
 void WLANModule::setup(bool configured)
 {
+#ifdef ParamWLAN_WifiSSID
 #if ARDUINO_ARCH_ESP32     
     Preferences preferences;
+#endif
     if (!configured)
     {
+#if ARDUINO_ARCH_ESP32           
         if (preferences.begin("WLAN", true))
         {
             auto ssid = preferences.getString("SSID");
@@ -110,6 +129,7 @@ void WLANModule::setup(bool configured)
                 WiFi.begin(ssid, password);
             }
         }
+#endif
     }
     else
     {
@@ -120,6 +140,7 @@ void WLANModule::setup(bool configured)
             WiFi.mode(WIFI_STA);
             WiFi.begin((const char *)ParamWLAN_WifiSSID, (const char *)ParamWLAN_WifiPassword);
             bool needSave = true;
+#if ARDUINO_ARCH_ESP32  
             if (preferences.begin("WLAN", true))
             {
                 auto ssid = preferences.getString("SSID");
@@ -134,16 +155,16 @@ void WLANModule::setup(bool configured)
                 preferences.putString("SSID", (const char *)ParamWLAN_WifiSSID);
                 preferences.putString("PWD", (const char *)ParamWLAN_WifiPassword);
             }
+#endif
         }
     }
-
 #endif
     // Do not call baseclass, baseclass will be called after first WiFi connection
 }
 
 void WLANModule::loop()
 {
-#if ARDUINO_ARCH_ESP32 
+#ifdef ParamWLAN_WifiSSID
     bool isConnected = connected();   
     if ((bool)KoWLAN_WLANState.value(DPT_Switch) != isConnected)
     {
@@ -151,6 +172,5 @@ void WLANModule::loop()
     }
 #endif
 }
-
 
 WLANModule openknxWLANModule;

@@ -1,6 +1,5 @@
 #pragma once
 #include "OpenKNX.h"
-#include "WiFi.h"
 
 class WLANModule : public OpenKNX::Module
 {
@@ -17,8 +16,11 @@ class WLANModule : public OpenKNX::Module
     void showInformations() override;
     void showHelp() override;
     bool connected();
+    bool established();
+    IPAddress localIP();
+    IPAddress subnetMask();
+    IPAddress gatewayIP();
     bool processCommand(const std::string cmd, bool diagnoseKo) override;
-
 };
 
 extern WLANModule openknxWLANModule;
