@@ -128,6 +128,7 @@ void WLANModule::setup(bool configured)
                 WiFi.mode(WIFI_STA);
                 WiFi.begin(ssid, password);
             }
+            preferences.end();
         }
 #endif
     }
@@ -154,6 +155,7 @@ void WLANModule::setup(bool configured)
                 preferences.begin("WLAN", false);
                 preferences.putString("SSID", (const char *)ParamWLAN_WifiSSID);
                 preferences.putString("PWD", (const char *)ParamWLAN_WifiPassword);
+                preferences.end();
             }
 #endif
         }
