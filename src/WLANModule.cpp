@@ -16,6 +16,9 @@ const std::string WLANModule::name()
 
 const std::string WLANModule::version()
 {
+#ifdef WLAN_ModuleVersion
+    return WLAN_ModuleVersion;
+#else
     // hides the module in the version output on the console, because the firmware version is sufficient.
     return "";
 }
